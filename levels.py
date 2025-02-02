@@ -1,6 +1,6 @@
 
 def read_levels():
-    lists = []
+    level_sets = []
     fh = open('data/levels.txt', 'r')
     for line in fh:
         chars_only = line.strip()
@@ -8,29 +8,28 @@ def read_levels():
             continue
         if chars_only.startswith('#'):
             continue
-        lists.append(set(chars_only))
+        level_sets.append(set(chars_only))
     fh.close()
-    lists.append(set())
-    return lists
+    level_sets.append(set())
+    return list(map(lambda set: dict(zip(set, [0] * len(set))), level_sets))
 
-sets = read_levels()
+counts = read_levels()
+
+def get_char_level(ch):
+    level = -1
+    for l in range(len(counts)):
+        if ch in counts[l]:
+            level = l
+    if level == -1:
+        level = len(counts) - 1
+        counts[level][ch] = 0
+    counts[level][ch] += 1
+    return level
 
 def get_level(word):
-    max = -1
-    for ch in word:
-        idx = -1
-        for i in range(len(sets)):
-            if ch in sets[i]:
-                idx = i
-        if idx == -1:
-            idx = len(sets) - 1
-            sets[idx].add(ch)
-        if idx > max:
-            max = idx
-
-    return max
+    return max(map(get_char_level, word))
 
 def get_unencountered():
-    return list(sorted(sets[-1]))
+    return list(sorted(counts[-1].keys()))
 
 
